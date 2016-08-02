@@ -12,7 +12,12 @@ struct _IMAGE_PE_HEADER_INFO {
 
 int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo);
 
+int GetPEHeaderInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo);
+
 int ReadPE(const char* target, char** pTargetFileBuffer);
 
+int GetImageBufFromFileBuf(const char* fileBuffer, char** imageBuffer);
+
+int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer);
 
 #endif
