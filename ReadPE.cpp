@@ -55,6 +55,8 @@ int ReadPE(const char* target, char** pTargetFileBuffer) {
 		return 0;
 	}
 	
+	memset(fileBuffer, 0, targetLen);
+
 	//拷贝文件到内存
 	int readNum;
 	while((readNum = fread(fileBuffer, 1, targetLen, targetHandler)) != targetLen) {
@@ -93,6 +95,8 @@ int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_I
 		}
 		return 1;
 	}
+	memset(info, 0, sizeof(struct _IMAGE_PE_HEADER_INFO));
+
 	info->DosHeader = (struct _IMAGE_DOS_HEADER*)fileBuffer;
 	info->Signature = *((int*)(fileBuffer + info->DosHeader->e_lfanew));
 	info->PeHeader = (struct _IMAGE_FILE_HEADER*)(fileBuffer + info->DosHeader->e_lfanew + 4);
@@ -143,7 +147,7 @@ int GetImageBufFromFileBuf(const char* fileBuffer, char** imageBuffer) {
 	int numOfSections = pToPEHeaderInfo->PeHeader->NumberOfSections;
 	struct _IMAGE_SECTION_HEADER * firstHeader = pToPEHeaderInfo->SectionHeader;
 	for(int i=0;i<numOfSections;i++) {
-		memcpy(ImageBuf + firstHeader->VirtualAddress, FileBuf + firstHeader->PointerToRawData,(unsigned int)firstHeader->Misc.VirtualSize);
+		memcpy(ImageBuf + firstHeader->VirtualAddress, FileBuf + firstHeader->PointerToRawData,firstHeader->SizeOfRawData);
 		firstHeader ++;
 	}
 	*imageBuffer = ImageBuf;
@@ -185,8 +189,6 @@ int GetPEHeaderInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_HEADER
 	return 0;
 }
 
-
-
 /*
 * int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer) 
 * 成功返回0,失败返回1
@@ -225,6 +227,9 @@ int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer) {
 		return 1;
 	}
 	memset(FileBuf, 0, (int)endAddress);
+	if(__DEBUG__) {
+		printf("allocate memory for FileBuf, size:%d Bytes\n", (int)endAddress);
+	}
 
 	//拷贝头部(头部+节表)
 	int sizeOfHeader = info->OpPEHeader->SizeOfHeaders;
@@ -234,9 +239,45 @@ int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer) {
 	int numOfSections = info->PeHeader->NumberOfSections;
 	struct _IMAGE_SECTION_HEADER * firstHeader = info->SectionHeader;
 	for(int i=0;i<numOfSections;i++) {
-		memcpy(FileBuf + firstHeader->PointerToRawData, imageBuffer + firstHeader->VirtualAddress,(unsigned int)firstHeader->SizeOfRawData);
+		printf("copying header %s: Addr:%x, total %x Bytes\n", firstHeader->Name, firstHeader->PointerToRawData, firstHeader->SizeOfRawData);
+		memcpy(FileBuf + firstHeader->PointerToRawData, imageBuffer + firstHeader->VirtualAddress, firstHeader->SizeOfRawData);
 		firstHeader ++;
 	}
 	*fileBuffer = FileBuf;
+	return 0;
+}
+
+/*
+* int SaveFileFromBuf(const char *fileName, const char* buffer, long size)
+* 成功返回0,失败返回1
+*
+* 使用说明:
+* char* fileName = "C:/123.txt"
+* int ret = SaveFileFromBuf(filename, buffer, buffer_size) 
+* if(ret != 0) {
+*     ...
+* }
+*
+*/
+
+int SaveFileFromBuf(const char *fileName, const char* buffer, long size) {
+	FILE* fileHandler = fopen(fileName,"wb");
+	if(fileHandler == NULL) {
+		if(__DEBUG__) {
+			printf("can not write file %s\n", fileName);
+		}
+		return 1;
+	}
+
+	int ret = fwrite(buffer, 1, size, fileHandler);
+	if(ret != size) {
+		if(__DEBUG__) {
+			printf("write file %s incomplete, expected written Bytes:%d; actual written Bytes:%d\n", fileName, size, ret);
+		}
+		fclose(fileHandler);
+		return 1;
+	}
+	
+	fclose(fileHandler);
 	return 0;
 }

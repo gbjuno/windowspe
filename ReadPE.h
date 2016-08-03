@@ -20,4 +20,5 @@ int GetImageBufFromFileBuf(const char* fileBuffer, char** imageBuffer);
 
 int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer);
 
+int SaveFileFromBuf(const char *fileName, const char* buffer, long size);
 #endif
