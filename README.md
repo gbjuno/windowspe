@@ -22,7 +22,7 @@ int num = ReadPE(target,&pTarget);
 free(*pTarget);
 ···
 
-###int GetPEHeaderInfoFromFileBuf(const charfileBuffer, struct _IMAGE_PE_INFO *pToPEInfo)
+###int GetPEHeaderInfoFromBuf(const char* buffer, struct _IMAGE_PE_INFO *pToPEInfo)
 ####作用:根据文件镜像获取PE头部信息
 ####成功返回0,失败返回1	
 ####使用说明
