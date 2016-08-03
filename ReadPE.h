@@ -10,9 +10,7 @@ struct _IMAGE_PE_HEADER_INFO {
 	struct _IMAGE_SECTION_HEADER *SectionHeader;
 };
 
-int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo);
-
-int GetPEHeaderInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo);
+int GetPEHeaderInfoFromBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo);
 
 int ReadPE(const char* target, char** pTargetFileBuffer);
 

@@ -18,7 +18,7 @@ int Test_ReadPE() {
 	return 0;
 }
 
-int Test_GetPEHeaderInfoFromFileBuf() {
+int Test_GetPEHeaderInfoFromBuf() {
 	char* target = SrcFile;
 	char* pTargetFileBuffer = NULL;
 	struct _IMAGE_PE_HEADER_INFO * pToPEHeaderInfo = NULL;
@@ -29,10 +29,10 @@ int Test_GetPEHeaderInfoFromFileBuf() {
 		return 1;
 	}
 
-	int ret = GetPEHeaderInfoFromFileBuf(pTargetFileBuffer, &pToPEHeaderInfo);
+	int ret = GetPEHeaderInfoFromBuf(pTargetFileBuffer, &pToPEHeaderInfo);
 	if (ret != 0) {
 		free(pTargetFileBuffer);
-		printf("GetPEHeaderInfoFromFileBuf error!\n");
+		printf("GetPEHeaderInfoFromBuf error!\n");
 		return 1;
 	}
 
@@ -56,10 +56,10 @@ int Test_GetImageBufFromFileBuf() {
 		return 1;
 	}
 	
-	int ret = GetPEHeaderInfoFromFileBuf(pTargetFileBuffer, &pToPEHeaderInfo);
+	int ret = GetPEHeaderInfoFromBuf(pTargetFileBuffer, &pToPEHeaderInfo);
 	if (ret != 0) {
 		free(pTargetFileBuffer);
-		printf("GetPEHeaderInfoFromFileBuf error!\n");
+		printf("GetPEHeaderInfoFromBuf error!\n");
 		return 1;
 	}
 
@@ -76,7 +76,7 @@ int Test_GetImageBufFromFileBuf() {
 
 }
 
-int Test_GetPEHeaderInfoFromImageBuf() {
+int Test_GetFileBufFromImageBuf() {
 	char* target = SrcFile;
 	char* pTargetFileBuffer = NULL;
 	char* imageBuffer = NULL;
@@ -89,10 +89,10 @@ int Test_GetPEHeaderInfoFromImageBuf() {
 		return 1;
 	}
 	
-	int ret = GetPEHeaderInfoFromFileBuf(pTargetFileBuffer, &pToPEHeaderInfo);
+	int ret = GetPEHeaderInfoFromBuf(pTargetFileBuffer, &pToPEHeaderInfo);
 	if (ret != 0) {
 		free(pTargetFileBuffer);
-		printf("GetPEHeaderInfoFromFileBuf error!\n");
+		printf("GetPEHeaderInfoFromBuf error!\n");
 		return 1;
 	}
 
@@ -137,7 +137,7 @@ char RunCode[18] = {
 #define MessageBoxAddr 0x77d507ea
 int insertCode(char** pImageBuf) {
 	struct _IMAGE_PE_HEADER_INFO * info = NULL;
-	GetPEHeaderInfoFromImageBuf(*pImageBuf,&info);
+	GetPEHeaderInfoFromBuf(*pImageBuf,&info);
 
 	int numOfSections = info->PeHeader->NumberOfSections;
 	struct _IMAGE_SECTION_HEADER *firstHeader = info->SectionHeader;
@@ -181,9 +181,9 @@ int insertCode(char** pImageBuf) {
 
 int main(int argc, char ** argv) {
 	//Test_ReadPE();
-	//Test_GetPEHeaderInfoFromFileBuf();
+	//Test_GetPEHeaderInfoFromBuf();
 	//Test_GetImageBufFromFileBuf();
-	//Test_GetPEHeaderInfoFromImageBuf();
+	//Test_GetFileBufFromImageBuf();
 	
 	char* oldFileBuf = NULL;
 	char* imageBuf = NULL;

@@ -79,7 +79,7 @@ int ReadPE(const char* target, char** pTargetFileBuffer) {
 *
 * 使用方式:
 * struct _IMAGE_PE_HEADER_INFO* pToPEHeaderInfo = NULL;
-* int ret = GetPEHeaderInfoFromFileBuf(fileBuffer,&pToPEHeaderInfo);
+* int ret = GetPEHeaderInfoFromBuf(fileBuffer,&pToPEHeaderInfo);
 * if(ret != 0) {
 * ...
 * }
@@ -87,7 +87,7 @@ int ReadPE(const char* target, char** pTargetFileBuffer) {
 */
 
 
-int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo) {
+int GetPEHeaderInfoFromBuf(const char* buffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo) {
 	struct _IMAGE_PE_HEADER_INFO *info = (struct _IMAGE_PE_HEADER_INFO *)malloc(sizeof(struct _IMAGE_PE_HEADER_INFO));
 	if(info == NULL) {
 		if(__DEBUG__) {
@@ -97,9 +97,9 @@ int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_I
 	}
 	memset(info, 0, sizeof(struct _IMAGE_PE_HEADER_INFO));
 
-	info->DosHeader = (struct _IMAGE_DOS_HEADER*)fileBuffer;
-	info->Signature = *((int*)(fileBuffer + info->DosHeader->e_lfanew));
-	info->PeHeader = (struct _IMAGE_FILE_HEADER*)(fileBuffer + info->DosHeader->e_lfanew + 4);
+	info->DosHeader = (struct _IMAGE_DOS_HEADER*)buffer;
+	info->Signature = *((int*)(buffer + info->DosHeader->e_lfanew));
+	info->PeHeader = (struct _IMAGE_FILE_HEADER*)(buffer + info->DosHeader->e_lfanew + 4);
 	info->OpPEHeader = (struct _IMAGE_OPTIONAL_HEADER*)((char *)info->PeHeader + 20);
 	info->SectionHeader = (struct _IMAGE_SECTION_HEADER*)((char *)info->OpPEHeader + info->PeHeader->SizeOfOptionalHeader);
 
@@ -122,7 +122,7 @@ int GetPEHeaderInfoFromFileBuf(const char* fileBuffer, struct _IMAGE_PE_HEADER_I
 int GetImageBufFromFileBuf(const char* fileBuffer, char** imageBuffer) {
 
 	struct _IMAGE_PE_HEADER_INFO* pToPEHeaderInfo = NULL;
-	int ret = GetPEHeaderInfoFromFileBuf(fileBuffer, &pToPEHeaderInfo);
+	int ret = GetPEHeaderInfoFromBuf(fileBuffer, &pToPEHeaderInfo);
 	if(ret != 0) {
 		return 1;
 	}
@@ -155,40 +155,6 @@ int GetImageBufFromFileBuf(const char* fileBuffer, char** imageBuffer) {
 	return 0;
 }
 
-
-/* 
-* 
-* int GetPEInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_INFO ** pToPEInfo)
-* 成功返回0,失败返回1	
-*
-* 使用方式:
-* struct _IMAGE_PE_HEADER_INFO* pToPEHeaderInfo = NULL;
-* int ret = GetPEHeaderInfoFromImageBuf(imageBuffer,&pToPEHeaderInfo);
-* if(ret != 0) {
-* ...
-* }
-* free(pToPEHeaderInfo);
-*/
-
-
-int GetPEHeaderInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_HEADER_INFO ** pToPEHeaderInfo) {
-	struct _IMAGE_PE_HEADER_INFO *info = (struct _IMAGE_PE_HEADER_INFO *)malloc(sizeof(struct _IMAGE_PE_HEADER_INFO));
-	if(info == NULL) {
-		if(__DEBUG__) {
-			printf("cannot allocate space for _IMAGE_PE_HEADER_INFO\n");
-		}
-		return 1;
-	}
-	info->DosHeader = (struct _IMAGE_DOS_HEADER*)imageBuffer;
-	info->Signature = *((int*)(imageBuffer + info->DosHeader->e_lfanew));
-	info->PeHeader = (struct _IMAGE_FILE_HEADER*)(imageBuffer + info->DosHeader->e_lfanew + 4);
-	info->OpPEHeader = (struct _IMAGE_OPTIONAL_HEADER*)((char *)info->PeHeader + 20);
-	info->SectionHeader = (struct _IMAGE_SECTION_HEADER*)((char *)info->OpPEHeader + info->PeHeader->SizeOfOptionalHeader);
-
-	*pToPEHeaderInfo = info;
-	return 0;
-}
-
 /*
 * int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer) 
 * 成功返回0,失败返回1
@@ -204,10 +170,10 @@ int GetPEHeaderInfoFromImageBuf(const char* imageBuffer, struct _IMAGE_PE_HEADER
 */
 int GetFileBufFromImageBuf(const char * imageBuffer, char ** fileBuffer) {
 	struct _IMAGE_PE_HEADER_INFO *info = NULL;
-	int ret = GetPEHeaderInfoFromImageBuf(imageBuffer, &info);
+	int ret = GetPEHeaderInfoFromBuf(imageBuffer, &info);
 	if(ret != 0) {
 		if(__DEBUG__) {
-			printf("GetPEHeaderInfoFromImageBuf return 1\n");
+			printf("GetPEHeaderInfoFromBuf return 1\n");
 		}
 		return 1;
 	}
